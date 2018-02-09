@@ -29,8 +29,73 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 #
 # Your goal is to write the score method.
 
+# https://stackoverflow.com/questions/4749973/ruby-greed-koan-how-can-i-improve-my-if-then-soup
+
 def score(dice)
   # You need to write this method
+  # Solution 1 - Doesn't meet first condition of score = 0
+  #def score (dice)
+  #  sum = 0
+  #  (1..6).each do |i|
+  #      idice = dice.select { |d| d == i }
+  #      count = idice.size
+
+  #      if count >= 3
+  #          sum += (i==1 ? 1000 : i*100)
+  #      end
+  #      sum += (count % 3) * 100   if i == 1
+  #      sum += (count % 3) *  50   if i == 5
+  #  end
+  #  sum
+
+  # Solution 2 - Works very nicely
+  #total = 0
+  ## handle triples scores for all but '1'
+  #(2..6).each do |num|
+  #  total += dice.count(num) / 3 * num * 100
+  #end
+  ## non-triple score for '5'
+  #total += dice.count(5) % 3 * 50
+  ## all scores for '1'
+  #total += dice.count(1) / 3 * 1000 + dice.count(1) % 3 * 100
+  #total
+
+  # Solution 3 - Also works though more verbose
+  result = 0
+  # First idea: loop through all values and add to hash but only 
+  # once per unique value and have a counter for how many times 
+  # value was found
+  #
+  # The param for the new() method call acts as a default value if 
+  # an accessed key doesn't exist. Awesome! Saved me from writing a 
+  # bloated each statement with an if/elsif to handle existence!
+  counts = Hash.new(0)
+  dice.each do |value|
+    counts[value] += 1
+  end
+  counts.each do |item,numFound|
+    # 1,1,1 = 1000 points
+    if item == 1 && numFound >= 3 then
+      result += 1000
+      numFound -= 3
+    end
+    # any number other than 1, found 3 times is that number times 
+    # 100.. so 5,5,5 = 500 points, 3,3,3 = 300 points, etc.
+    if item != 1 && numFound >= 3 then
+      result += item * 100
+      numFound -= 3
+    end
+    # 1 (not part of set) = 100 points for each found
+    if item == 1 && numFound <= 2 then 
+      result += 100 * numFound
+    end
+    # 5 (not part of set) = 50 points for each found
+    if item == 5 && numFound <=2 then
+      result += 50 * numFound
+    end
+  end
+  result
+
 end
 
 class AboutScoringProject < Neo::Koan
